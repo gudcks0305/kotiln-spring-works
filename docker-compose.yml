@@ -1,0 +1,22 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:15
+    container_name: rag-postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: raguser
+      POSTGRES_PASSWORD: ragpass
+      POSTGRES_DB: ragdb
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    command: >
+      bash -c "apt-get update &&
+               apt-get install -y postgresql-$${PG_MAJOR}-pgvector &&
+               docker-entrypoint.sh postgres &&
+               psql -U raguser -c 'CREATE EXTENSION IF NOT EXISTS vector;'"
+
+volumes:
+  pgdata:

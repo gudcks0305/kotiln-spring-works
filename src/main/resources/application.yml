@@ -1,0 +1,24 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/ragdb
+    username: raguser
+    password: ragpass
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true   #
+  main:
+    allow-bean-definition-overriding: true
+
+langchain4j:
+  open-ai:
+    chat-model:
+      api-key: ${OPENAI_API_KEY:test}
+      model-name: gpt-4o-mini
+      log-requests: true
+      log-responses: true
+
+security:
+  access-token:
+    jwt-secret-key: 7f344a8039ee7370bf84a9a0effe21d036c26f58e832158f530fdb84bc77b92b # $ openssl rand -hex 32
+    expiry-in-milli: 900000 # 15분 * 60 * 1000
