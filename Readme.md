@@ -2,7 +2,8 @@
 - postgres docker 실행
 - OPEN_API_KEY 발급
 - ex : export OPEN_API_KEY=1234
-
+- docker compose up -d
+- ./gradlew bootRun
 
 
 # 유스케이스 
