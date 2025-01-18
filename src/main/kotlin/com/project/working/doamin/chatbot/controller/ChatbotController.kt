@@ -95,14 +95,6 @@ class ChatbotController(
         return ResponseEntity.noContent().build()
     }
 
-    @DeleteMapping("/test")
-    fun test(
-        @AuthenticationPrincipal user: AuthenticatedUser,
-        @PathVariable threadId: Long
-    ): ResponseEntity<Any> {
-        return ResponseEntity.noContent().build()
-    }
-
 }
 
 data class ChatbotRequest(
