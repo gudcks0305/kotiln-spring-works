@@ -11,10 +11,13 @@ import org.springframework.ai.chat.model.ChatResponse
 import org.springframework.ai.chat.model.StreamingChatModel
 import org.springframework.ai.chat.prompt.Prompt
 import org.springframework.ai.openai.OpenAiChatOptions
-import org.springframework.ai.openai.api.OpenAiApi
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+import reactor.core.publisher.Flux
+import reactor.core.scheduler.Schedulers
 
-
+@Transactional
 @Service
 class ChatbotService(
     private val chatModel: ChatModel,
@@ -28,7 +31,6 @@ class ChatbotService(
         chatHistory : List<Chat>,
         question: String,
         model: String?,
-        isStreaming: Boolean
     ): ChatResponse {
         val createMessageByChatHistory = createMessageByChatHistory(chatHistory)
         createMessageByChatHistory.add(UserMessage(question))
@@ -37,6 +39,25 @@ class ChatbotService(
             Prompt(
                 createMessageByChatHistory,
                 OpenAiChatOptions.builder().withModel(model)
+                    .withTemperature(0.4)
+                    .build()
+            )
+        )
+        return response
+    }
+
+    fun askStreaming(
+        chatHistory : List<Chat>,
+        question: String,
+        model: String?,
+    ): Flux<ChatResponse> {
+        val createMessageByChatHistory = createMessageByChatHistory(chatHistory)
+        createMessageByChatHistory.add(UserMessage(question))
+
+        val response = streamingChatModel.stream(
+            Prompt(
+                createMessageByChatHistory,
+                OpenAiChatOptions.builder().withModel(model).withStreamUsage(true)
                     .withTemperature(0.4)
                     .build()
             )
@@ -63,15 +84,24 @@ class ChatbotService(
 
     fun askChatBot(
         userId: Long,
-        request : ChatbotRequest
-    ): ChatResponse {
+        request: ChatbotRequest,
+        isStreaming: Boolean
+    ): Any {
         val user = userRepository.findById(userId).orElseThrow()
         val thread = threadService.getOrCreateThread(user)
         val chatHistory = chatService.getChatsByThread(thread.id!!)
-        val response = ask(chatHistory, request.question, request.model, request.isStreaming)
-        chatService.createChat(thread, request.question, response.result.output.content)
 
-        return response
+        return if (isStreaming) {
+            askStreaming(chatHistory, request.question, request.model)
+                .publishOn(Schedulers.boundedElastic())
+
+        } else {
+            val response = ask(chatHistory, request.question, request.model)
+            chatService.createChat(thread, request.question, response.result.output.content)
+            response
+        }
     }
+
+
 
 }

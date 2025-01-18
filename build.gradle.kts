@@ -41,6 +41,10 @@ dependencies {
     runtimeOnly ("io.jsonwebtoken:jjwt-jackson:0.12.3")
 
     implementation("org.springframework.ai:spring-ai-openai-spring-boot-starter")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactive")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
+
+
 
 }
 

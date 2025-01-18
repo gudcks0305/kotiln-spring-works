@@ -2,6 +2,7 @@ package com.project.working.doamin.auth.filter
 
 import com.project.working.doamin.auth.dto.AuthenticatedUser
 import com.project.working.doamin.auth.jwt.JwtTokenProvider
+import com.project.working.doamin.user.dto.UserDto
 import com.project.working.doamin.user.entity.User
 import com.project.working.doamin.user.repository.UserRepository
 import jakarta.servlet.FilterChain
@@ -50,8 +51,8 @@ class JwtAuthenticationFilter(
 
             filterChain.doFilter(request, response)
         } catch (e: Exception) {
-            println(e.stackTrace)
             response.status = HttpStatus.UNAUTHORIZED.value()
+            throw e
         }
     }
 
@@ -73,7 +74,7 @@ class JwtAuthenticationFilter(
             throw IllegalArgumentException("Invalid JWT Token")
         }
 
-        val user: User = userQueryRepository.getReferenceById(userId)
+        val user: UserDto = userQueryRepository.findUserDtoById(userId)
         val authenticatedUser: AuthenticatedUser = AuthenticatedUser(user)
 
         return UsernamePasswordAuthenticationToken(

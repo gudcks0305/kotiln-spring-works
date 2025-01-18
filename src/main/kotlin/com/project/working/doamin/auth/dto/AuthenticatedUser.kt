@@ -1,13 +1,13 @@
 package com.project.working.doamin.auth.dto
 
+import com.project.working.doamin.user.dto.UserDto
 import com.project.working.doamin.user.entity.User
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
-import java.util.List
 
-class AuthenticatedUser(user: User) : UserDetails {
+class AuthenticatedUser(user: UserDto) : UserDetails {
     @Transient
-    private val user: User = user
+    private val user: UserDto = user
 
     override fun getAuthorities(): Collection<GrantedAuthority> {
         return listOf(GrantedAuthority { user.role.name })
