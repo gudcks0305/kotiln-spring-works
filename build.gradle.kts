@@ -17,6 +17,8 @@ java {
 
 repositories {
     mavenCentral()
+    maven { url = uri("https://repo.spring.io/milestone") }
+
 }
 
 extra["springAiVersion"] = "1.0.0-M4"
@@ -33,17 +35,20 @@ dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
-    // langchain
-    implementation("dev.langchain4j:langchain4j:0.36.2")
-    implementation("dev.langchain4j:langchain4j-open-ai-spring-boot-starter:0.36.2")
-    implementation("dev.langchain4j:langchain4j-spring-boot-starter:0.36.2")
-    implementation("dev.langchain4j:langchain4j-pgvector:0.36.2")
     implementation ("org.springframework.boot:spring-boot-starter-security")
     implementation ("io.jsonwebtoken:jjwt-api:0.12.3")
     runtimeOnly ("io.jsonwebtoken:jjwt-impl:0.12.3")
     runtimeOnly ("io.jsonwebtoken:jjwt-jackson:0.12.3")
+
+    implementation("org.springframework.ai:spring-ai-openai-spring-boot-starter")
+
 }
 
+dependencyManagement {
+    imports {
+        mavenBom("org.springframework.ai:spring-ai-bom:${property("springAiVersion")}")
+    }
+}
 
 
 kotlin {
