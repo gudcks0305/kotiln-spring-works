@@ -16,4 +16,4 @@ spring:
 security:
   access-token:
     jwt-secret-key: 7f344a8039ee7370bf84a9a0effe21d036c26f58e832158f530fdb84bc77b92b # $ openssl rand -hex 32
-    expiry-in-milli: 900000 # 15분 * 60 * 1000
+    expiry-in-milli: 9000000 # 15분 * 60 * 1000

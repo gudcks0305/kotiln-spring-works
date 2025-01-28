@@ -12,6 +12,7 @@ import org.springframework.ai.chat.model.StreamingChatModel
 import org.springframework.ai.chat.prompt.Prompt
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
+import org.springframework.data.util.Optionals.toStream
 import org.springframework.data.web.PageableDefault
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -21,6 +22,8 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody
 import reactor.core.publisher.Flux
 import reactor.core.scheduler.Schedulers
+import java.io.IOException
+import java.time.Duration
 
 
 @RestController
@@ -40,19 +43,36 @@ class ChatbotController(
 
         return if (request.isStreaming) {
             val streamingResponse = chatbotService.askChatBot(user.userId, request, true) as Flux<*>
-            val emitter = SseEmitter()
-            val result= ""
+            val emitter = SseEmitter(30_000L) // 30초 타임아웃 설정
+
             streamingResponse
-                .subscribeOn(Schedulers.boundedElastic())
-                .subscribe(
-                    { response ->
-                        response as ChatResponse
-                        emitter.send(response.result.output.content, MediaType.APPLICATION_JSON)
-                    },
-                    { emitter.complete() },
-                    { emitter.complete() }
-                )
+                .delayElements(Duration.ofSeconds(1)) // 1초 간격으로 데이터 전송
+                .doOnNext { chatResponse ->
+                    try {
+                        if (chatResponse is ChatResponse) {
+                            val result = chatResponse.result
+                            if (result == null || result.output == null || result.output.content == null) {
+                                emitter.send(
+                                    SseEmitter.event().name("chat-response")
+                                        .data("No content available")
+                                )
+                            } else {
+                                emitter.send(
+                                    SseEmitter.event().name("chat-response")
+                                        .data(result.output.content)
+                                )
+                            }
+                        }
+
+                    } catch (e: IOException) {
+                        emitter.completeWithError(e)
+                    }
+                }
+                .doOnComplete { emitter.complete() }
+                .doOnError { emitter.completeWithError(it) }
+                .subscribe()
             emitter
+
         } else {
             val response = chatbotService.askChatBot(user.userId, request, false) as ChatResponse
             ResponseEntity.ok(response)
