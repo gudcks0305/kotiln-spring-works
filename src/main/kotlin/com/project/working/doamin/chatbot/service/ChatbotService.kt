@@ -92,6 +92,7 @@ class ChatbotService(
         val chatHistory = chatService.getChatsByThread(thread.id!!)
 
         return if (isStreaming) {
+            val resultBuilder = StringBuilder()
             askStreaming(chatHistory, request.question, request.model)
                 .publishOn(Schedulers.boundedElastic())
 

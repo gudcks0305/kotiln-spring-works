@@ -9,7 +9,6 @@ import com.project.working.doamin.chatbot.repository.FeedbackRepository
 import com.project.working.doamin.user.repository.UserRepository
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
-import org.springframework.data.jpa.domain.AbstractPersistable_.id
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -51,11 +50,11 @@ class ChatFeedbackService(
     }
 
     fun getFeedbackList(userId: Long, positive: Boolean?, pageable: Pageable): Page<ChatFeedback> {
-        return chatFeedbackRepository.findAllByUserIdAndPositive(userId, positive, pageable)
+        return chatFeedbackRepository.findAllByUserIdAndIsPositive(userId, positive, pageable)
     }
 
     fun getFeedbackDtoList(userId: Long, positive: Boolean?, pageable: Pageable): Page<ChatFeedbackDto> {
-        val feedbackList = chatFeedbackRepository.findAllByUserIdAndPositive(userId, positive, pageable)
+        val feedbackList = chatFeedbackRepository.findAllByUserIdAndIsPositive(userId, positive, pageable)
         return feedbackList.map { ChatFeedbackDto(
             id = it.id!!,
             userId = it.user.id,

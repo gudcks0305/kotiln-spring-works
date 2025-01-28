@@ -9,5 +9,5 @@ interface FeedbackRepository : JpaRepository<ChatFeedback, Long> {
     fun findByUserId(userId: Long): List<ChatFeedback>
     fun findByChatId(chatId: Long): List<ChatFeedback>
     fun findByUserIdAndChatId(userId: Long, chatId: Long): ChatFeedback?
-    fun findAllByUserIdAndPositive(userId: Long, isPositive: Boolean?, pageable: Pageable): Page<ChatFeedback>
+    fun findAllByUserIdAndIsPositive(userId: Long, isPositive: Boolean?, pageable: Pageable): Page<ChatFeedback>
 }
